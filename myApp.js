@@ -105,9 +105,9 @@ var MyLayer = cc.Layer.extend({
         this.square.setVisible(false);
         bg_top.addChild(this.square);
 
-        this.jumpHeight = this.circle.getContentSize().height * 0.9;
+        this.jumpHeight = this.circle.getContentSize().height * 0.8;
         this.gameState = 1;
-        this.runSpeed = 2;
+        this.runSpeed = 2.5;
         this.score = 0;
 
         this.scheduleUpdate();
@@ -118,11 +118,19 @@ var MyLayer = cc.Layer.extend({
     },
 
     startGame: function(sender){
+        cc.AudioEngine.getInstance().playEffect(m_button_touch);
+
         var bgTop = this.getChildByTag(1000);
-        this.runSpeed = 2.0;
+        var bgBottom = this.getChildByTag(1001);
+        bgTop.setColor(cc.c4(205,225,235,255));
+        bgBottom.setColor(cc.c4(63, 88, 100, 255));
+
+        this.runSpeed = 2.5;
         this.score = 0;
         var scoreBg = this.getChildByTag(1002);
         var scoreLabel = scoreBg.getChildByTag(1003);
+        scoreLabel.setString("0");
+        scoreLabel.setColor(cc.c4(205, 225, 235, 255));
 
         this.resetRunner();
 
@@ -142,9 +150,12 @@ var MyLayer = cc.Layer.extend({
             var circleBox = this.circle.getBoundingBox();
             var squareBox = this.square.getBoundingBox();
 
+            var winSize = cc.Director.getInstance().getWinSize();
+
             //碰撞检测
             if(cc.rectIntersectsRect(squareBox, circleBox)){
                 this.gameState = 2;
+                cc.AudioEngine.getInstance().playEffect(m_die);
 
                 var pExplosion = cc.ParticleExplosion.create();
                 if(this.currentTag == this.circle.getTag()){
@@ -174,15 +185,43 @@ var MyLayer = cc.Layer.extend({
                 var start = this.getChildByTag(1004);
                 start.setVisible(true);
             }
-            else if(squareBox.x + squareBox.width/2 + 150 < circleBox.x - circleBox.width/2){
-                cc.log("reset");
+            else if(squareBox.x + squareBox.width/2 + winSize.width * 0.6 < circleBox.x - circleBox.width/2){
+                cc.AudioEngine.getInstance().playEffect(m_score);
                 this.gameState = 3; //game reset
                 this.circle.setVisible(false);
                 this.square.setVisible(false);
                 this.score++;
 
+                //更改分数
+                var scoreBg = this.getChildByTag(1002);
+                var Label = scoreBg.getChildByTag(1003);
+                Label.setString(this.score);
+
                 if(this.score % 2 == 0){
                     this.runSpeed += 0.1;
+                }
+
+                if(this.score % 5 == 0){
+                    var topBg = this.getChildByTag(1000);
+                    var bottomBg = this.getChildByTag(1001);
+                    var scoreBg = this.getChildByTag(1002);
+                    var scoreLabel = scoreBg.getChildByTag(1003);
+                    var tmp = this.score / 5;
+                    if(tmp % 3 == 0){
+                        topBg.setColor(cc.c4(205, 225, 235, 255));
+                        bottomBg.setColor(cc.c4(63, 88, 100, 255));
+                        scoreLabel.setColor(cc.c4(205, 225, 235, 255));
+                    }
+                    else if(tmp % 3 == 1){
+                        topBg.setColor(cc.c4(209, 196, 236, 255));
+                        bottomBg.setColor(cc.c4(83, 69, 113, 255));
+                        scoreLabel.setColor(cc.c4(209, 196, 236, 255));
+                    }
+                    else{
+                        topBg.setColor(cc.c4(239, 211, 192, 255));
+                        bottomBg.setColor(cc.c4(113, 81, 59, 255));
+                        scoreLabel.setColor(cc.c4(239, 211, 192, 255));
+                    }
                 }
             }
         }
@@ -202,13 +241,13 @@ var MyLayer = cc.Layer.extend({
         var rand = Math.random();
         if(rand < 0.5){
             this.currentTag = 1010;
-            this.circle.setScale(0.4);
-            this.square.setScale(0.8);
+            this.circle.setScale(0.5);
+            this.square.setScale(1);
         }
         else{
             this.currentTag = 1020;
-            this.square.setScale(0.4);
-            this.circle.setScale(0.8);
+            this.square.setScale(0.5);
+            this.circle.setScale(1);
         }
 
         this.circle.setVisible(true);
@@ -225,6 +264,7 @@ var MyLayer = cc.Layer.extend({
         if(this.gameState != 1)
             return true;
 
+        cc.AudioEngine.getInstance().playEffect(m_player_jump);
         cc.SpriteFrameCache.getInstance().addSpriteFrames(s_Plist, s_WatchOut);
         if(location.x >= winSize.width/2){
             var jumpAction = this.square.getActionByTag(1021);
