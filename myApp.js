@@ -2,19 +2,15 @@
  Copyright (c) 2010-2012 cocos2d-x.org
  Copyright (c) 2008-2010 Ricardo Quesada
  Copyright (c) 2011      Zynga Inc.
-
  http://www.cocos2d-x.org
-
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
  The above copyright notice and this permission notice shall be included in
  all copies or substantial portions of the Software.
-
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -72,11 +68,18 @@ var MyLayer = cc.Layer.extend({
         scoreBg.setTag(1002);
         this.addChild(scoreBg, 1);
 
-        var label = cc.LabelTTF.create("0","Arial",100);
+        var label = cc.LabelTTF.create("0","Agency FB",100);
         label.setPosition(scoreBg.getContentSize().width/2, scoreBg.getContentSize().height/2);
         label.setColor(cc.c4(205, 225, 235, 255));
         label.setTag(1003);
         scoreBg.addChild(label);
+
+        //var intro = cc.Sprite.create(s_Intro, cc.rect(0,0,480,854));
+        //intro.setAnchorPoint(cc.p(0,0));
+        //intro.setPosition(cc.p(0,0));
+        //intro.setTag(1005);
+        //this.addChild(intro,2);
+
 
         var startMenuItem = cc.MenuItemImage.create();
         startMenuItem.setNormalSpriteFrame(cc.SpriteFrameCache.getInstance().getSpriteFrame("start_game.png"));
@@ -87,7 +90,7 @@ var MyLayer = cc.Layer.extend({
         var menu = cc.Menu.create(startMenuItem);
         menu.setPosition(0,0);
         menu.setTag(1004);
-        this.addChild(menu,2);
+        this.addChild(menu,3);
 
         var circle1 = cc.SpriteFrameCache.getInstance().getSpriteFrame("yuanyuan.png");
         this.circle = cc.Sprite.createWithSpriteFrame(circle1);
@@ -107,7 +110,7 @@ var MyLayer = cc.Layer.extend({
 
         this.jumpHeight = this.circle.getContentSize().height * 0.8;
         this.gameState = 1;
-        this.runSpeed = 2.5;
+        this.runSpeed = 3;
         this.score = 0;
 
         this.scheduleUpdate();
@@ -124,6 +127,9 @@ var MyLayer = cc.Layer.extend({
         var bgBottom = this.getChildByTag(1001);
         bgTop.setColor(cc.c4(205,225,235,255));
         bgBottom.setColor(cc.c4(63, 88, 100, 255));
+
+        //var intro = this.getChildByTag(1005);
+        //intro.setVisible(false);
 
         this.runSpeed = 2.5;
         this.score = 0;
@@ -185,7 +191,7 @@ var MyLayer = cc.Layer.extend({
                 var start = this.getChildByTag(1004);
                 start.setVisible(true);
             }
-            else if(squareBox.x + squareBox.width/2 + winSize.width * 0.6 < circleBox.x - circleBox.width/2){
+            else if(this.square.getPositionX() < this.circle.getPositionX() && this.circle.getPositionY() < 2 && this.square.getPositionY() < 2){
                 cc.AudioEngine.getInstance().playEffect(m_score);
                 this.gameState = 3; //game reset
                 this.circle.setVisible(false);
@@ -198,7 +204,7 @@ var MyLayer = cc.Layer.extend({
                 Label.setString(this.score);
 
                 if(this.score % 2 == 0){
-                    this.runSpeed += 0.1;
+                    this.runSpeed += 0.2;
                 }
 
                 if(this.score % 5 == 0){
@@ -236,18 +242,20 @@ var MyLayer = cc.Layer.extend({
 
         this.circle.setAnchorPoint(cc.p(0,0));
         this.square.setAnchorPoint(cc.p(1,0));
-        this.circle.setPosition(0,1);
-        this.square.setPosition(winSize.width, 1);
-        var rand = Math.random();
-        if(rand < 0.5){
+        var rand = Math.random()*100;
+        if(rand < 50){
             this.currentTag = 1010;
             this.circle.setScale(0.5);
             this.square.setScale(1);
+            this.circle.setPosition(cc.p(15, 1));
+            this.square.setPosition(cc.p(winSize.width, 1));
         }
         else{
             this.currentTag = 1020;
             this.square.setScale(0.5);
             this.circle.setScale(1);
+            this.circle.setPosition(cc.p(0, 1));
+            this.square.setPosition(cc.p(winSize.width-15, 1));
         }
 
         this.circle.setVisible(true);
@@ -271,7 +279,7 @@ var MyLayer = cc.Layer.extend({
             if(!jumpAction){
                 this.square.setDisplayFrame(cc.SpriteFrameCache.getInstance().getSpriteFrame("fangfang_jump.png"));
                 jumpAction = cc.Sequence.create(cc.JumpBy.create(0.5, cc.p(-80, 0), this.jumpHeight, 1),
-                   cc.CallFunc.create(this.callbackRunAction, this, this.square));
+                    cc.CallFunc.create(this.callbackRunAction, this, this.square));
                 jumpAction.setTag(1021);
                 this.square.runAction(jumpAction);
             }
